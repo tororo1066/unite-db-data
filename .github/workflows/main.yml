@@ -1,0 +1,27 @@
+# Github Actions
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: HTTP Request Action
+        uses: fjogeleit/http-request-action@v1.16.1
+        id: stats
+        with:
+          url: 'https://unite-db.com/stats.json'
+          method: 'GET'
+          customHeaders: '{"Content-Type": "application/json"}'
+      # コミットする
+      - name: Commit files
+        run: |
+          stats.response > stats.json
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add stats.json
+          git commit -m "Update stats.json"
+          git push
